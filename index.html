@@ -8,20 +8,25 @@
     <style>
         :root { --primary: #b71c1c; --secondary: #ff9800; --dark: #1a1a1a; --bg: #f8f9fa; --card-bg: #ffffff; --text: #2c3e50; --text-light: #7f8c8d; }
         * { box-sizing: border-box; margin: 0; padding: 0; }
-        body { font-family: 'Inter', 'Segoe UI', Arial, sans-serif; background-color: var(--bg); color: var(--text); padding: 20px; position: relative; }
+        html, body { font-family: 'Inter', 'Segoe UI', Arial, sans-serif; background-color: var(--bg); color: var(--text); overflow-x: hidden; width: 100%; max-width: 100vw; }
+        body { padding: 15px; }
         .container { max-width: 800px; margin: 0 auto; position: relative; }
         
-        /* Header */
-        .main-header { text-align: center; margin-bottom: 25px; position: relative; z-index: 1; }
-        .main-header h1 { font-size: 22px; color: var(--dark); text-transform: uppercase; font-weight: 800; letter-spacing: -0.5px; }
-        .main-header p { font-size: 13px; color: var(--text-light); margin-top: 5px; }
+        /* Header Dark Slate (Sama seperti Vis 2) */
+        .main-header { 
+            background: linear-gradient(135deg, #2c3e50 0%, #3b4d5f 100%); 
+            color: white; padding: 25px 20px; border-radius: 12px; margin-bottom: 20px; 
+            text-align: center; border-bottom: 4px solid var(--secondary); box-shadow: 0 4px 10px rgba(0,0,0,0.08);
+        }
+        .main-header h1 { font-size: 22px; font-weight: 800; letter-spacing: -0.5px; text-transform: uppercase; margin: 0; }
+        .main-header p { font-size: 13px; opacity: 0.85; margin-top: 6px; }
 
         /* KPI Grid */
         .kpi-row { 
             display: grid; 
             grid-template-columns: repeat(2, 1fr); 
             gap: 12px; 
-            margin-bottom: 25px; 
+            margin-bottom: 20px; 
             position: relative; 
             z-index: 1;
         }
@@ -32,7 +37,15 @@
             } 
         }
         
-        .kpi-card { background: var(--card-bg); padding: 15px; border-radius: 10px; box-shadow: 0 2px 8px rgba(0,0,0,0.05); border-top: 4px solid var(--primary); text-align: center; display: flex; flex-direction: column; justify-content: space-between; }
+        /* KPI Card (Diberi sentuhan glassmorphism agar cocok dengan header gelap) */
+        .kpi-card { 
+            background: rgba(255, 255, 255, 0.9); 
+            backdrop-filter: blur(10px); 
+            padding: 15px; border-radius: 12px; 
+            box-shadow: 0 4px 15px rgba(0,0,0,0.05); 
+            border-top: 4px solid var(--primary); 
+            text-align: center; display: flex; flex-direction: column; justify-content: space-between; 
+        }
         .kpi-card.orange { border-top-color: var(--secondary); }
         .kpi-card.blue { border-top-color: #2196f3; }
         .kpi-card.green { border-top-color: #4caf50; }
@@ -43,8 +56,15 @@
         .kpi-card.green .value { color: #4caf50; }
         .kpi-card .desc { font-size: 9px; color: var(--text-light); margin-top: 6px; }
 
-        .panel { background: var(--card-bg); border-radius: 10px; padding: 20px; box-shadow: 0 2px 8px rgba(0,0,0,0.05); position: relative; z-index: 1; }
-        .panel h2 { font-size: 16px; margin-bottom: 5px; color: var(--dark); text-transform: uppercase; font-weight: 800; text-align: center; }
+        /* Panel Chart (Sama seperti Vis 2) */
+        .panel { 
+            background: rgba(255, 255, 255, 0.9); 
+            backdrop-filter: blur(10px); 
+            border-radius: 12px; padding: 20px; 
+            box-shadow: 0 4px 15px rgba(0,0,0,0.05); 
+            position: relative; z-index: 1; border: 1px solid rgba(255,255,255,0.5); 
+        }
+        .panel h2 { font-size: 16px; margin-bottom: 15px; color: var(--dark); text-transform: uppercase; font-weight: 800; text-align: center; letter-spacing: 0.5px; }
 
         .footer-source { text-align: center; margin-top: 20px; font-size: 11px; color: #999; position: relative; z-index: 1; }
     </style>
@@ -165,7 +185,7 @@ window.onload = function() {
     const layout = {
         dragmode: false, 
         hovermode: 'x unified',
-        margin: { l: 50, r: 50, b: 40, t: 40 }, // Margin atas dikembalikan ke 40
+        margin: { l: 50, r: 50, b: 40, t: 40 },
         xaxis: { 
             type: 'category',
             tickfont: { size: 11, color: '#888' }, 
@@ -216,7 +236,6 @@ window.onload = function() {
                 currentStep++;
                 setTimeout(drawNext, 400);
             } else {
-                // ANOTASI DIHAPUS DI SINI AGAR TIDAK NABRAK
                 sendHeight(); 
             }
         }
