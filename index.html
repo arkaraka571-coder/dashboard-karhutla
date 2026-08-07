@@ -1,0 +1,284 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Visualisasi 1: Statistik Karhutla</title>
+    <script src="https://cdn.plot.ly/plotly-2.27.0.min.js"></script>
+    <style>
+        :root { --primary: #b71c1c; --secondary: #ff9800; --dark: #1a1a1a; --bg: #f8f9fa; --card-bg: #ffffff; --text: #2c3e50; --text-light: #7f8c8d; }
+        * { box-sizing: border-box; margin: 0; padding: 0; }
+        body { font-family: 'Inter', 'Segoe UI', Arial, sans-serif; background-color: var(--bg); color: var(--text); padding: 20px; position: relative; }
+        .container { max-width: 800px; margin: 0 auto; position: relative; }
+        
+        /* Header */
+        .main-header { text-align: center; margin-bottom: 25px; position: relative; z-index: 1; }
+        .main-header h1 { font-size: 22px; color: var(--dark); text-transform: uppercase; font-weight: 800; letter-spacing: -0.5px; }
+        .main-header p { font-size: 13px; color: var(--text-light); margin-top: 5px; }
+
+        /* KPI Grid */
+        .kpi-row { 
+            display: grid; 
+            grid-template-columns: repeat(2, 1fr); 
+            gap: 12px; 
+            margin-bottom: 25px; 
+            position: relative; 
+            z-index: 1;
+        }
+        @media (min-width: 768px) { 
+            .kpi-row { 
+                grid-template-columns: repeat(4, 1fr); 
+                gap: 15px; 
+            } 
+        }
+        
+        .kpi-card { background: var(--card-bg); padding: 15px; border-radius: 10px; box-shadow: 0 2px 8px rgba(0,0,0,0.05); border-top: 4px solid var(--primary); text-align: center; display: flex; flex-direction: column; justify-content: space-between; }
+        .kpi-card.orange { border-top-color: var(--secondary); }
+        .kpi-card.blue { border-top-color: #2196f3; }
+        .kpi-card.green { border-top-color: #4caf50; }
+        .kpi-card h3 { font-size: 10px; color: var(--text-light); text-transform: uppercase; margin-bottom: 10px; font-weight: 700; min-height: 36px; display: flex; align-items: center; justify-content: center; line-height: 1.3; }
+        .kpi-card .value { font-size: 20px; font-weight: 800; color: var(--primary); line-height: 1.2; }
+        .kpi-card.orange .value { color: var(--secondary); }
+        .kpi-card.blue .value { color: #2196f3; }
+        .kpi-card.green .value { color: #4caf50; }
+        .kpi-card .desc { font-size: 9px; color: var(--text-light); margin-top: 6px; }
+
+        .panel { background: var(--card-bg); border-radius: 10px; padding: 20px; box-shadow: 0 2px 8px rgba(0,0,0,0.05); position: relative; z-index: 1; }
+        .panel h2 { font-size: 16px; margin-bottom: 5px; color: var(--dark); text-transform: uppercase; font-weight: 800; text-align: center; }
+
+        .footer-source { text-align: center; margin-top: 20px; font-size: 11px; color: #999; position: relative; z-index: 1; }
+    </style>
+</head>
+<body>
+<div class="container" id="main-content">
+
+    <div class="main-header">
+        <h1>Karhutla Jawa Timur</h1>
+        <p>Periode Per 5 Agustus 2026</p>
+    </div>
+
+    <div class="kpi-row">
+        <div class="kpi-card">
+            <h3>Luas Lahan Terbakar 2026 (Estimasi Sipongi)</h3>
+            <div>
+                <div class="value" data-target="2927.08" data-decimals="2" data-suffix="Ha">0 Ha</div>
+                <div class="desc">Data resmi KLHK</div>
+            </div>
+        </div>
+        <div class="kpi-card orange">
+            <h3>Hotspot Sipongi</h3>
+            <div>
+                <div class="value" data-target="34" data-decimals="0" data-suffix="Titik">0 Titik</div>
+                <div class="desc">13 Kab/Kota Tersebar</div>
+            </div>
+        </div>
+        <div class="kpi-card blue">
+            <h3>Kejadian Terpublikasi (Media)</h3>
+            <div>
+                <div class="value" data-target="21" data-decimals="0" data-suffix="Kejadian">0 Kejadian</div>
+                <div class="desc">Kasus verifikatif lapangan</div>
+            </div>
+        </div>
+        <div class="kpi-card green">
+            <h3>Luas Lahan Terbakar 2026 (Media)</h3>
+            <div>
+                <div class="value" data-target="1169.14" data-decimals="2" data-suffix="Ha">0 Ha</div>
+                <div class="desc">Akumulasi 21 insiden</div>
+            </div>
+        </div>
+    </div>
+
+    <div class="panel">
+        <h2>📈 Tren Historis Karhutla & Emisi CO2</h2>
+        <div id="chart-tren" style="width:100%; height:450px;"></div>
+    </div>
+
+    <div class="footer-source">
+        Sumber: Sipongi KLHK, BMKG, BNPB, dan beberapa media.
+    </div>
+</div>
+
+<script>
+window.onload = function() {
+    if (typeof Plotly === 'undefined') return;
+
+    // ==========================================
+    // 1. ANIMASI ANGKA BERGERAK (TAHAP 1)
+    // ==========================================
+    function animateCountUp(el) {
+        const target = parseFloat(el.dataset.target);
+        const decimals = parseInt(el.dataset.decimals);
+        const suffix = el.dataset.suffix;
+        let startTime = null;
+        const duration = 3000;
+
+        function step(timestamp) {
+            if (!startTime) startTime = timestamp;
+            const progress = Math.min((timestamp - startTime) / duration, 1);
+            const eased = 1 - Math.pow(1 - progress, 4);
+            const current = eased * target;
+            
+            el.innerHTML = current.toLocaleString('id-ID', { minimumFractionDigits: decimals, maximumFractionDigits: decimals }) + ' <span style="font-size:14px; font-weight:600;">' + suffix + '</span>';
+            
+            if (progress < 1) {
+                requestAnimationFrame(step);
+            } else {
+                el.innerHTML = target.toLocaleString('id-ID', { minimumFractionDigits: decimals, maximumFractionDigits: decimals }) + ' <span style="font-size:14px; font-weight:600;">' + suffix + '</span>';
+            }
+        }
+        requestAnimationFrame(step);
+    }
+
+    // ==========================================
+    // 2. GRAFIK & ANIMASI GARIS (TAHAP 2)
+    // ==========================================
+    const years = ['2018', '2019', '2020', '2021', '2022', '2023', '2024', '2025', '2026'];
+    const luas = [8886.39, 23655, 19148, 15458, 2380, 49498.32, 20957.17, 10667.23, 2927.08];
+    const emisi = [1059894, 3872134, 2212151, 2042032, 280367, 7489228, 3978174, 1698038, null];
+
+    let initialYLuas = luas.map((val, index) => index === 0 ? val : null);
+    let initialYEmisi = emisi.map((val, index) => index === 0 ? val : null);
+
+    const traceLuas = {
+        x: years, y: initialYLuas,
+        name: 'Luas Karhutla (Ha)',
+        mode: 'lines+markers',
+        line: { shape: 'spline', color: '#b71c1c', width: 4 },
+        marker: { size: 10, color: '#b71c1c', line: { color: '#ffffff', width: 1 } },
+        fill: 'tozeroy',
+        fillcolor: 'rgba(183, 28, 28, 0.1)',
+        connectgaps: false,
+        hovertemplate: '<b>Luas:</b> %{y} Ha<extra></extra>'
+    };
+
+    const traceEmisi = {
+        x: years, y: initialYEmisi,
+        name: 'Emisi CO2 (Ton)',
+        mode: 'lines+markers',
+        line: { color: '#2e7d32', width: 2, dash: 'dot' },
+        marker: { size: 6, color: '#2e7d32' },
+        yaxis: 'y2',
+        connectgaps: false,
+        hovertemplate: '<b>Emisi:</b> %{y} Ton<extra></extra>'
+    };
+
+    const layout = {
+        dragmode: false, 
+        hovermode: 'x unified',
+        margin: { l: 50, r: 50, b: 40, t: 60 },
+        xaxis: { 
+            type: 'category',
+            tickfont: { size: 11, color: '#888' }, 
+            gridcolor: 'transparent',
+            linecolor: '#eee',
+            showline: true,
+            fixedrange: true,
+            tickvals: years, 
+            ticktext: years,
+            showspikes: true,
+            spikethickness: 1,
+            spikedash: 'dot',
+            spikecolor: '#999',
+            spikemode: 'across'
+        },
+        yaxis: { 
+            title: { text: 'Luas (Ha)', font: { size: 11, color: '#b71c1c' } }, 
+            tickfont: { size: 10, color: '#b71c1c' }, 
+            gridcolor: '#f5f5f5',
+            zeroline: false,
+            fixedrange: true,
+            range: [0, 65000] 
+        },
+        yaxis2: {
+            title: { text: 'Emisi (Ton)', font: { size: 11, color: '#2e7d32' } },
+            overlaying: 'y', side: 'right',
+            tickfont: { size: 10, color: '#2e7d32' },
+            showgrid: false, fixedrange: true, range: [0, 8000000]
+        },
+        legend: { orientation: "h", y: 1.12, x: 0.5, xanchor: 'center', font: { size: 10 } },
+        plot_bgcolor: 'transparent', 
+        paper_bgcolor: 'transparent',
+        showlegend: true
+    };
+
+    Plotly.newPlot('chart-tren', [traceLuas, traceEmisi], layout, {displayModeBar: false, responsive: true, scrollZoom: false});
+
+    function startChartAnimation() {
+        let currentStep = 1;
+        
+        function drawNext() {
+            if (currentStep < years.length) {
+                let newYLuas = luas.map((val, index) => index <= currentStep ? val : null);
+                let newYEmisi = emisi.map((val, index) => index <= currentStep ? val : null);
+                
+                Plotly.restyle('chart-tren', { y: [newYLuas, newYEmisi] }, [0, 1]);
+                
+                currentStep++;
+                setTimeout(drawNext, 400);
+            } else {
+                Plotly.relayout('chart-tren', {
+                    annotations: [
+                        {
+                            x: '2023', y: 49498.32, xref: 'x', yref: 'y',
+                            text: "49.498 Ha (El Niño)", showarrow: true,
+                            arrowhead: 2, arrowsize: 1, arrowwidth: 2, arrowcolor: '#ff9800',
+                            font: { size: 11, color: '#333', weight: 'bold' }, ay: -40, ax: 0
+                        },
+                        {
+                            x: '2026', y: 2927.08, xref: 'x', yref: 'y',
+                            text: "2.927 Ha (per 5 Agustus 2026)", showarrow: true,
+                            arrowhead: 2, arrowsize: 1, arrowwidth: 2, arrowcolor: '#ff9800',
+                            font: { size: 11, color: '#333', weight: 'bold' }, ay: 40, ax: 0
+                        }
+                    ]
+                });
+            }
+        }
+        drawNext();
+    }
+
+    // ==========================================
+    // 3. URUTAN ANIMASI BERGANTIAN
+    // ==========================================
+    function startSequentialAnimation() {
+        // TAHAP 1: Jalankan angka ringkasan (Butuh waktu 3 detik)
+        document.querySelectorAll('.kpi-card .value').forEach(animateCountUp);
+        
+        // TAHAP 2: Tunggu 3.5 detik, lalu mulai gambar grafik tren
+        setTimeout(startChartAnimation, 3500);
+    }
+
+    let hasAnimated = false;
+    function triggerAnimations() {
+        if (!hasAnimated) {
+            hasAnimated = true;
+            startSequentialAnimation();
+        }
+    }
+
+    // Sensor Scroll
+    const observer = new IntersectionObserver((entries) => {
+        entries.forEach(entry => {
+            if (entry.isIntersecting) {
+                triggerAnimations();
+                observer.unobserve(entry.target);
+            }
+        });
+    }, { threshold: 0.1 });
+
+    const target = document.getElementById('main-content');
+    if(target) observer.observe(target);
+    
+    // Fallback: Jaga-jaga jika sensor scroll gagal di iframe
+    setTimeout(triggerAnimations, 2000);
+
+    // Auto Resize Iframe
+    function sendHeight() { 
+        window.parent.postMessage({ type: 'jatimBencanaMapHeight', height: document.body.scrollHeight }, '*'); 
+    }
+    sendHeight();
+    setTimeout(sendHeight, 2000); // Kirim ulang setelah animasi dimulai
+};
+</script>
+</body>
+</html>
