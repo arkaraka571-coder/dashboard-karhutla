@@ -43,7 +43,7 @@
 
         .panel { background: var(--panel); border: 1px solid var(--border); padding: 20px; position: relative; z-index: 1; }
         .panel h2 { font-family: 'JetBrains Mono', monospace; font-size: 14px; margin-bottom: 15px; color: var(--text); text-transform: uppercase; font-weight: 800; text-align: left; letter-spacing: 1px; border-left: 3px solid var(--accent); padding-left: 10px; }
-        .chart-container { height: 400px; width: 100%; }
+        .chart-container { height: 450px; width: 100%; }
 
         @keyframes blink { 0% { opacity: 1; } 50% { opacity: 0; } 100% { opacity: 1; } }
     </style>
@@ -52,7 +52,7 @@
 <div class="container" id="main-content">
     <div class="main-header">
         <h1>Karhutla Jawa Timur 2026<span class="blink-cursor"></span></h1>
-        <p>// SYSTEM ONLINE // DATA PER 17 AGUSTUS 2026</p>
+        <p>// DATA PER 17 AGUSTUS 2026</p>
     </div>
     <div class="kpi-row">
         <div class="kpi-card red"><h3>Luas (Sipongi)</h3><div><div class="value" data-target="2927.08" data-decimals="2" data-suffix="Ha">0 Ha</div><div class="desc">// Estimasi KLHK</div></div></div>
@@ -85,9 +85,22 @@ window.onload = function() {
     const emisi = [1059894, 3872134, 2212151, 2042032, 280367, 7489228, 3978174, 1698038, null];
     let initialYLuas = luas.map((val, index) => index === 0 ? val : null);
     let initialYEmisi = emisi.map((val, index) => index === 0 ? val : null);
-    const traceLuas = { x: years, y: initialYLuas, name: 'Luas Karhutla (Ha)', mode: 'lines+markers', line: { shape: 'spline', color: '#ff2d00', width: 3 }, marker: { size: 6, color: '#ff2d00', line: { color: '#050507', width: 1 } }, fill: 'tozeroy', fillcolor: 'rgba(255, 45, 0, 0.1)', connectgaps: false, hovertemplate: '<b>Luas:</b> %{y} Ha<extra></extra>' };
-    const traceEmisi = { x: years, y: initialYEmisi, name: 'Emisi CO2 (Ton)', mode: 'lines+markers', line: { color: '#00f0ff', width: 2, dash: 'dot' }, marker: { size: 4, color: '#00f0ff' }, yaxis: 'y2', connectgaps: false, hovertemplate: '<b>Emisi:</b> %{y} Ton<extra></extra>' };
-    const layout = { dragmode: false, hovermode: 'x unified', margin: { l: 40, r: 40, b: 30, t: 10 }, paper_bgcolor: 'transparent', plot_bgcolor: 'transparent', font: { family: 'JetBrains Mono, monospace', size: 10, color: '#a0a0b0' }, xaxis: { type: 'category', gridcolor: '#1a1a24', linecolor: '#1a1a24', showline: true, fixedrange: true, tickvals: years, ticktext: years, showspikes: true, spikethickness: 1, spikedash: 'dot', spikecolor: '#ff2d00', spikemode: 'across' }, yaxis: { title: { text: 'Luas (Ha)', font: { color: '#ff2d00', size: 10 } }, tickfont: { color: '#ff2d00', size: 9 }, gridcolor: '#1a1a24', zeroline: false, fixedrange: true, range: [0, 65000] }, yaxis2: { title: { text: 'Emisi (Ton)', font: { color: '#00f0ff', size: 10 } }, overlaying: 'y', side: 'right', tickfont: { color: '#00f0ff', size: 9 }, showgrid: false, fixedrange: true, range: [0, 8000000] }, legend: { orientation: "h", y: 1.1, x: 0.5, xanchor: 'center', font: { color: '#ffffff', size: 9 } }, showlegend: true };
+    
+    const traceLuas = { x: years, y: initialYLuas, name: 'Luas Karhutla (Ha)', mode: 'lines+markers', line: { shape: 'spline', color: '#ff2d00', width: 3 }, marker: { size: 6, color: '#ff2d00', line: { color: '#050507', width: 1 } }, fill: 'tozeroy', fillcolor: 'rgba(255, 45, 0, 0.1)', connectgaps: false, hovertemplate: '<b>Luas:</b> %{y:,.2f} Ha<extra></extra>' };
+    const traceEmisi = { x: years, y: initialYEmisi, name: 'Emisi CO2 (Ton)', mode: 'lines+markers', line: { color: '#00f0ff', width: 2, dash: 'dot' }, marker: { size: 4, color: '#00f0ff' }, yaxis: 'y2', connectgaps: false, hovertemplate: '<b>Emisi:</b> %{y:,.0f} Ton<extra></extra>' };
+    
+    const layout = { 
+        dragmode: false, hovermode: 'x unified', margin: { l: 50, r: 50, b: 40, t: 60 }, 
+        paper_bgcolor: 'transparent', plot_bgcolor: 'transparent',
+        font: { family: 'JetBrains Mono, monospace', size: 11, color: '#a0a0b0' }, 
+        hoverlabel: { bgcolor: '#111', bordercolor: '#ff2d00', font: { color: '#fff', family: 'JetBrains Mono, monospace', size: 12 } },
+        xaxis: { type: 'category', gridcolor: '#1a1a24', linecolor: '#1a1a24', showline: true, fixedrange: true, tickvals: years, ticktext: years, showspikes: true, spikethickness: 1, spikedash: 'dot', spikecolor: '#ff2d00', spikemode: 'across' }, 
+        yaxis: { title: { text: 'Luas (Ha)', font: { color: '#ff2d00', size: 11 } }, tickfont: { color: '#ff2d00', size: 10 }, gridcolor: '#1a1a24', zeroline: false, fixedrange: true, range: [0, 65000] }, 
+        yaxis2: { title: { text: 'Emisi (Ton)', font: { color: '#00f0ff', size: 11 } }, overlaying: 'y', side: 'right', tickfont: { color: '#00f0ff', size: 10 }, showgrid: false, fixedrange: true, range: [0, 8000000] }, 
+        legend: { orientation: "h", y: 1.1, x: 0.5, xanchor: 'center', font: { color: '#ffffff', size: 11 } }, 
+        showlegend: true 
+    };
+    
     Plotly.newPlot('chart-tren', [traceLuas, traceEmisi], layout, {displayModeBar: false, responsive: true, scrollZoom: false});
     function startChartAnimation() { let currentStep = 1; function drawNext() { if (currentStep < years.length) { let newYLuas = luas.map((val, index) => index <= currentStep ? val : null); let newYEmisi = emisi.map((val, index) => index <= currentStep ? val : null); Plotly.restyle('chart-tren', { y: [newYLuas, newYEmisi] }, [0, 1]); currentStep++; setTimeout(drawNext, 400); } else { sendHeight(); } } drawNext(); }
     function startSequentialAnimation() { document.querySelectorAll('.kpi-card .value').forEach(animateCountUp); setTimeout(startChartAnimation, 3500); }
