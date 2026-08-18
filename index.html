@@ -3,65 +3,53 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Operation Fire Watch - Stats</title>
+    <title>Visualisasi 1: Statistik Karhutla</title>
     <script src="https://cdn.plot.ly/plotly-2.27.0.min.js"></script>
-    <link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500;700;800&family=Inter:wght@400;600;800&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;800&display=swap" rel="stylesheet">
     <style>
-        :root { 
-            --bg: #050507; --panel: #0a0a0f; --border: #1a1a24; --accent: #ff2d00; --accent-glow: rgba(255, 45, 0, 0.6); 
-            --warning: #ffab00; --text: #ffffff; --text-dim: #a0a0b0; --blue: #00f0ff; --green: #aaff00;
-        }
+        :root { --primary: #b71c1c; --secondary: #ff9800; --dark: #1a1a1a; --bg: #f8f9fa; --card-bg: #ffffff; --text: #2c3e50; --text-light: #7f8c8d; }
         * { box-sizing: border-box; margin: 0; padding: 0; }
-        html, body { font-family: 'Inter', sans-serif; background-color: var(--bg); color: var(--text); overflow-x: hidden; width: 100%; max-width: 100vw; }
-        body { padding: 15px; background-image: linear-gradient(rgba(255, 45, 0, 0.03) 1px, transparent 1px), linear-gradient(90deg, rgba(255, 45, 0, 0.03) 1px, transparent 1px); background-size: 40px 40px; }
-        .container { max-width: 800px; margin: 0 auto; position: relative; }
+        html, body { font-family: 'Inter', sans-serif; background-color: var(--bg); color: var(--text); overflow: hidden; width: 100%; height: 100vh; }
+        body { padding: 10px; }
+        .container { max-width: 800px; margin: 0 auto; position: relative; height: 100%; display: flex; flex-direction: column; }
         
-        .main-header { background: var(--panel); border: 1px solid var(--border); padding: 20px; margin-bottom: 15px; text-align: center; position: relative; overflow: hidden; }
-        .main-header::before { content: ''; position: absolute; top: 0; left: 0; width: 100%; height: 2px; background: linear-gradient(90deg, transparent, var(--accent), transparent); }
-        .main-header h1 { font-family: 'JetBrains Mono', monospace; font-size: 22px; font-weight: 800; letter-spacing: 2px; text-transform: uppercase; color: var(--accent); text-shadow: 0 0 15px var(--accent-glow); }
-        .main-header p { font-family: 'JetBrains Mono', monospace; font-size: 11px; color: var(--text-dim); margin-top: 6px; letter-spacing: 1px; }
-        .blink-cursor { display: inline-block; width: 8px; height: 14px; background: var(--accent); margin-left: 5px; animation: blink 1s steps(2) infinite; vertical-align: middle; }
+        .main-header { background: linear-gradient(135deg, #2c3e50 0%, #3b4d5f 100%); color: white; padding: 12px 20px; border-radius: 8px; margin-bottom: 10px; text-align: center; flex-shrink: 0; box-shadow: 0 4px 10px rgba(0,0,0,0.08); }
+        .main-header h1 { font-size: 18px; font-weight: 800; text-transform: uppercase; margin: 0; }
+        .main-header p { font-size: 10px; opacity: 0.85; margin-top: 4px; }
 
-        .kpi-row { display: grid; grid-template-columns: repeat(2, 1fr); gap: 12px; margin-bottom: 15px; position: relative; z-index: 1; }
-        @media (min-width: 768px) { .kpi-row { grid-template-columns: repeat(4, 1fr); } }
+        .kpi-row { display: grid; grid-template-columns: repeat(4, 1fr); gap: 10px; margin-bottom: 10px; flex-shrink: 0; }
+        @media (max-width: 768px) { .kpi-row { grid-template-columns: repeat(2, 1fr); } }
         
-        .kpi-card { background: var(--panel); border: 1px solid var(--border); padding: 15px; text-align: center; position: relative; overflow: hidden; transition: border-color 0.3s; }
-        .kpi-card:hover { border-color: var(--accent); }
-        .kpi-card::before { content: ''; position: absolute; top: 0; left: 0; width: 100%; height: 2px; background: var(--primary); }
-        .kpi-card.red::before { background: var(--accent); box-shadow: 0 0 10px var(--accent); }
-        .kpi-card.orange::before { background: var(--warning); box-shadow: 0 0 10px var(--warning); }
-        .kpi-card.blue::before { background: var(--blue); box-shadow: 0 0 10px var(--blue); }
-        .kpi-card.green::before { background: var(--green); box-shadow: 0 0 10px var(--green); }
-        
-        .kpi-card h3 { font-family: 'JetBrains Mono', monospace; font-size: 10px; color: var(--text-dim); text-transform: uppercase; margin-bottom: 8px; font-weight: 700; min-height: 30px; display: flex; align-items: center; justify-content: center; line-height: 1.3; letter-spacing: 1px; }
-        .kpi-card .value { font-family: 'JetBrains Mono', monospace; font-size: 20px; font-weight: 800; color: #fff; line-height: 1.2; }
-        .kpi-card.red .value { color: var(--accent); text-shadow: 0 0 15px var(--accent); }
-        .kpi-card.orange .value { color: var(--warning); text-shadow: 0 0 15px var(--warning); }
-        .kpi-card.blue .value { color: var(--blue); text-shadow: 0 0 15px var(--blue); }
-        .kpi-card.green .value { color: var(--green); text-shadow: 0 0 15px var(--green); }
-        .kpi-card .desc { font-family: 'JetBrains Mono', monospace; font-size: 9px; color: var(--text-dim); margin-top: 5px; letter-spacing: 0.5px; }
+        .kpi-card { background: var(--card-bg); padding: 10px; border-radius: 8px; box-shadow: 0 2px 8px rgba(0,0,0,0.05); border-top: 3px solid var(--primary); text-align: center; display: flex; flex-direction: column; justify-content: center; }
+        .kpi-card.orange { border-top-color: var(--secondary); }
+        .kpi-card.blue { border-top-color: #2196f3; }
+        .kpi-card.green { border-top-color: #4caf50; }
+        .kpi-card h3 { font-size: 9px; color: var(--text-light); text-transform: uppercase; margin-bottom: 5px; font-weight: 700; line-height: 1.2; }
+        .kpi-card .value { font-size: 18px; font-weight: 800; color: var(--primary); line-height: 1.1; }
+        .kpi-card.orange .value { color: var(--secondary); }
+        .kpi-card.blue .value { color: #2196f3; }
+        .kpi-card.green .value { color: #4caf50; }
+        .kpi-card .desc { font-size: 8px; color: var(--text-light); margin-top: 4px; }
 
-        .panel { background: var(--panel); border: 1px solid var(--border); padding: 20px; position: relative; z-index: 1; }
-        .panel h2 { font-family: 'JetBrains Mono', monospace; font-size: 14px; margin-bottom: 15px; color: var(--text); text-transform: uppercase; font-weight: 800; text-align: left; letter-spacing: 1px; border-left: 3px solid var(--accent); padding-left: 10px; }
-        .chart-container { height: 450px; width: 100%; }
-
-        @keyframes blink { 0% { opacity: 1; } 50% { opacity: 0; } 100% { opacity: 1; } }
+        .panel { background: var(--card-bg); border-radius: 8px; padding: 10px; box-shadow: 0 4px 10px rgba(0,0,0,0.05); flex-grow: 1; display: flex; flex-direction: column; overflow: hidden; }
+        .panel h2 { font-size: 12px; margin-bottom: 5px; color: var(--dark); text-transform: uppercase; font-weight: 800; text-align: center; flex-shrink: 0; }
+        .chart-container { flex-grow: 1; min-height: 0; width: 100%; }
     </style>
 </head>
 <body>
 <div class="container" id="main-content">
     <div class="main-header">
-        <h1>Karhutla Jawa Timur 2026<span class="blink-cursor"></span></h1>
-        <p>// DATA PER 17 AGUSTUS 2026</p>
+        <h1>Karhutla Jawa Timur 2026</h1>
+        <p>Periode Per 17 Agustus 2026</p>
     </div>
     <div class="kpi-row">
-        <div class="kpi-card red"><h3>Luas (Sipongi)</h3><div><div class="value" data-target="2927.08" data-decimals="2" data-suffix="Ha">0 Ha</div><div class="desc">// Estimasi KLHK</div></div></div>
-        <div class="kpi-card orange"><h3>Hotspot</h3><div><div class="value" data-target="20" data-decimals="0" data-suffix="Titik">0 Titik</div><div class="desc">// 8 Kab/Kota</div></div></div>
-        <div class="kpi-card blue"><h3>Kejadian Media</h3><div><div class="value" data-target="25" data-decimals="0" data-suffix="Insiden">0 Insiden</div><div class="desc">// Terverifikasi</div></div></div>
-        <div class="kpi-card green"><h3>Luas (Media)</h3><div><div class="value" data-target="2246.40" data-decimals="2" data-suffix="Ha">0 Ha</div><div class="desc">// 25 Insiden</div></div></div>
+        <div class="kpi-card"><h3>Luas (Sipongi)</h3><div class="value" data-target="2927.08" data-decimals="2" data-suffix="Ha">0 Ha</div><div class="desc">Estimasi KLHK</div></div>
+        <div class="kpi-card orange"><h3>Hotspot</h3><div class="value" data-target="20" data-decimals="0" data-suffix="Titik">0 Titik</div><div class="desc">8 Kab/Kota</div></div>
+        <div class="kpi-card blue"><h3>Kejadian Media</h3><div class="value" data-target="25" data-decimals="0" data-suffix="Insiden">0 Insiden</div><div class="desc">Terverifikasi</div></div>
+        <div class="kpi-card green"><h3>Luas (Media)</h3><div class="value" data-target="2246.40" data-decimals="2" data-suffix="Ha">0 Ha</div><div class="desc">25 Insiden</div></div>
     </div>
     <div class="panel">
-        <h2>Tren Historis Karhutla & Emisi CO2</h2>
+        <h2>📈 Tren Historis Karhutla & Emisi CO2</h2>
         <div id="chart-tren" class="chart-container"></div>
     </div>
 </div>
@@ -75,8 +63,8 @@ window.onload = function() {
             if (!startTime) startTime = timestamp;
             const progress = Math.min((timestamp - startTime) / duration, 1);
             const eased = 1 - Math.pow(1 - progress, 4); const current = eased * target;
-            el.innerHTML = current.toLocaleString('id-ID', { minimumFractionDigits: decimals, maximumFractionDigits: decimals }) + ' <span style="font-size:12px; font-weight:600; opacity:0.8;">' + suffix + '</span>';
-            if (progress < 1) { requestAnimationFrame(step); } else { el.innerHTML = target.toLocaleString('id-ID', { minimumFractionDigits: decimals, maximumFractionDigits: decimals }) + ' <span style="font-size:12px; font-weight:600; opacity:0.8;">' + suffix + '</span>'; }
+            el.innerHTML = current.toLocaleString('id-ID', { minimumFractionDigits: decimals, maximumFractionDigits: decimals }) + ' <span style="font-size:10px;">' + suffix + '</span>';
+            if (progress < 1) { requestAnimationFrame(step); } else { el.innerHTML = target.toLocaleString('id-ID', { minimumFractionDigits: decimals, maximumFractionDigits: decimals }) + ' <span style="font-size:10px;">' + suffix + '</span>'; }
         }
         requestAnimationFrame(step);
     }
@@ -85,31 +73,17 @@ window.onload = function() {
     const emisi = [1059894, 3872134, 2212151, 2042032, 280367, 7489228, 3978174, 1698038, null];
     let initialYLuas = luas.map((val, index) => index === 0 ? val : null);
     let initialYEmisi = emisi.map((val, index) => index === 0 ? val : null);
-    
-    const traceLuas = { x: years, y: initialYLuas, name: 'Luas Karhutla (Ha)', mode: 'lines+markers', line: { shape: 'spline', color: '#ff2d00', width: 3 }, marker: { size: 6, color: '#ff2d00', line: { color: '#050507', width: 1 } }, fill: 'tozeroy', fillcolor: 'rgba(255, 45, 0, 0.1)', connectgaps: false, hovertemplate: '<b>Luas:</b> %{y:,.2f} Ha<extra></extra>' };
-    const traceEmisi = { x: years, y: initialYEmisi, name: 'Emisi CO2 (Ton)', mode: 'lines+markers', line: { color: '#00f0ff', width: 2, dash: 'dot' }, marker: { size: 4, color: '#00f0ff' }, yaxis: 'y2', connectgaps: false, hovertemplate: '<b>Emisi:</b> %{y:,.0f} Ton<extra></extra>' };
-    
-    const layout = { 
-        dragmode: false, hovermode: 'x unified', margin: { l: 50, r: 50, b: 40, t: 60 }, 
-        paper_bgcolor: 'transparent', plot_bgcolor: 'transparent',
-        font: { family: 'JetBrains Mono, monospace', size: 11, color: '#a0a0b0' }, 
-        hoverlabel: { bgcolor: '#111', bordercolor: '#ff2d00', font: { color: '#fff', family: 'JetBrains Mono, monospace', size: 12 } },
-        xaxis: { type: 'category', gridcolor: '#1a1a24', linecolor: '#1a1a24', showline: true, fixedrange: true, tickvals: years, ticktext: years, showspikes: true, spikethickness: 1, spikedash: 'dot', spikecolor: '#ff2d00', spikemode: 'across' }, 
-        yaxis: { title: { text: 'Luas (Ha)', font: { color: '#ff2d00', size: 11 } }, tickfont: { color: '#ff2d00', size: 10 }, gridcolor: '#1a1a24', zeroline: false, fixedrange: true, range: [0, 65000] }, 
-        yaxis2: { title: { text: 'Emisi (Ton)', font: { color: '#00f0ff', size: 11 } }, overlaying: 'y', side: 'right', tickfont: { color: '#00f0ff', size: 10 }, showgrid: false, fixedrange: true, range: [0, 8000000] }, 
-        legend: { orientation: "h", y: 1.1, x: 0.5, xanchor: 'center', font: { color: '#ffffff', size: 11 } }, 
-        showlegend: true 
-    };
-    
+    const traceLuas = { x: years, y: initialYLuas, name: 'Luas Karhutla (Ha)', mode: 'lines+markers', line: { shape: 'spline', color: '#b71c1c', width: 3 }, marker: { size: 6, color: '#b71c1c', line: { color: '#fff', width: 1 } }, fill: 'tozeroy', fillcolor: 'rgba(183, 28, 28, 0.1)', connectgaps: false, hovertemplate: '<b>Luas:</b> %{y:,.2f} Ha<extra></extra>' };
+    const traceEmisi = { x: years, y: initialYEmisi, name: 'Emisi CO2 (Ton)', mode: 'lines+markers', line: { color: '#2e7d32', width: 2, dash: 'dot' }, marker: { size: 4, color: '#2e7d32' }, yaxis: 'y2', connectgaps: false, hovertemplate: '<b>Emisi:</b> %{y:,.0f} Ton<extra></extra>' };
+    const layout = { dragmode: false, hovermode: 'x unified', margin: { l: 40, r: 40, b: 30, t: 20 }, paper_bgcolor: 'transparent', plot_bgcolor: 'transparent', font: { family: 'Inter, sans-serif', size: 10, color: '#2c3e50' }, hoverlabel: { bgcolor: '#fff', bordercolor: '#b71c1c', font: { color: '#2c3e50', family: 'Inter, sans-serif', size: 12 } }, xaxis: { type: 'category', tickfont: { size: 10, color: '#888' }, gridcolor: 'transparent', linecolor: '#eee', showline: true, fixedrange: true, tickvals: years, ticktext: years, showspikes: true, spikethickness: 1, spikedash: 'dot', spikecolor: '#999', spikemode: 'across' }, yaxis: { title: { text: 'Luas (Ha)', font: { color: '#b71c1c', size: 10 } }, tickfont: { color: '#b71c1c', size: 9 }, gridcolor: '#f5f5f5', zeroline: false, fixedrange: true, range: [0, 65000] }, yaxis2: { title: { text: 'Emisi (Ton)', font: { color: '#2e7d32', size: 10 } }, overlaying: 'y', side: 'right', tickfont: { color: '#2e7d32', size: 9 }, showgrid: false, fixedrange: true, range: [0, 8000000] }, legend: { orientation: "h", y: 1.1, x: 0.5, xanchor: 'center', font: { size: 10 } }, showlegend: true };
     Plotly.newPlot('chart-tren', [traceLuas, traceEmisi], layout, {displayModeBar: false, responsive: true, scrollZoom: false});
-    function startChartAnimation() { let currentStep = 1; function drawNext() { if (currentStep < years.length) { let newYLuas = luas.map((val, index) => index <= currentStep ? val : null); let newYEmisi = emisi.map((val, index) => index <= currentStep ? val : null); Plotly.restyle('chart-tren', { y: [newYLuas, newYEmisi] }, [0, 1]); currentStep++; setTimeout(drawNext, 400); } else { sendHeight(); } } drawNext(); }
+    function startChartAnimation() { let currentStep = 1; function drawNext() { if (currentStep < years.length) { let newYLuas = luas.map((val, index) => index <= currentStep ? val : null); let newYEmisi = emisi.map((val, index) => index <= currentStep ? val : null); Plotly.restyle('chart-tren', { y: [newYLuas, newYEmisi] }, [0, 1]); currentStep++; setTimeout(drawNext, 400); } } drawNext(); }
     function startSequentialAnimation() { document.querySelectorAll('.kpi-card .value').forEach(animateCountUp); setTimeout(startChartAnimation, 3500); }
     let hasAnimated = false; function triggerAnimations() { if (!hasAnimated) { hasAnimated = true; startSequentialAnimation(); } }
     const observer = new IntersectionObserver((entries) => { entries.forEach(entry => { if (entry.isIntersecting) { triggerAnimations(); observer.unobserve(entry.target); } }); }, { threshold: 0.1 });
     const target = document.getElementById('main-content'); if(target) observer.observe(target); setTimeout(triggerAnimations, 2000);
-    function sendHeight() { var h = document.body.scrollHeight; window.parent.postMessage({ type: 'jatimBencanaMapHeight', height: h }, '*'); }
-    sendHeight(); setTimeout(sendHeight, 1000); setTimeout(sendHeight, 3000); setTimeout(sendHeight, 5000); setTimeout(sendHeight, 7000);
-    window.onresize = sendHeight;
+    function sendHeight() { var h = window.innerHeight; window.parent.postMessage({ type: 'jatimBencanaMapHeight', height: h }, '*'); }
+    sendHeight(); setTimeout(sendHeight, 1000); window.onresize = sendHeight;
 };
 </script>
 </body>
